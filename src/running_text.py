@@ -19,7 +19,7 @@ class RunningText:
 
 class RunningTextManager:
     '''Manages the running texts that are displayed on the screen'''
-    def __init__(self, texts, max_texts_running, max_text_speed, font):
+    def __init__(self, texts, max_texts_running, max_text_speed, max_text_spawn_delay, font):
         # Parameter initialization
         self.remaining_texts = texts
         self.max_texts_running = max_texts_running
@@ -27,7 +27,7 @@ class RunningTextManager:
         self.font = font
 
         # Default class variables
-        self.start_delay = 60 * 3
+        self.start_delay = 60 * random.randint(1, max_text_spawn_delay)
         self.delay_timer = 0
         self.running_texts = []
     
