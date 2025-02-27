@@ -4,8 +4,8 @@ import os
 from utils import *
 from globals import *
 
-from running_text import RunningTextManager
-from formatted_text import FormattedText
+from text import FormattedText, TextInfo
+from text_managers import RunningTextManager
 
 # setup pygame
 pygame.init()
@@ -24,20 +24,13 @@ typed = ""
 score = 0
 allowed_chars = allowed_chars = string.ascii_letters + string.digits + " "
 
-text = "hello people how are you this is a test goodbye and thanks for playing this is the last text good job congratulations you did it you are a pro"
-formatted_text = FormattedText(text, font, 'white', 'red', 'green', 'yellow', 30)
-
-
-texts = ["hello people", "how are you", "this is a test",
-          "goodbye", "thanks for playing", "this is the last text",
-            "good job", "congratulations", "you did it", "you are a pro"]
-running_text_manager = RunningTextManager(
-    texts=texts,
-    max_texts_running=3,
-    max_text_speed=5,
-    max_text_spawn_delay=4,
-    font=font
-)
+texts = [
+    "hello people how are you this is a test goodbye and thanks for playing you did it you are a pro",
+    "no seriously who thought this would be a good idea",
+    "this is game is kinda trash, nobody would want to play a game you just type and type and type..."
+]
+text_info = TextInfo(font, 'white', 'red', 'green', 'yellow', 30, 10, 0)
+running_text_manager = RunningTextManager(texts, text_info, -3, 4)
 
 # game loop
 while running:
@@ -50,6 +43,7 @@ while running:
             if event.key == pygame.K_BACKSPACE:
                 if event.mod == pygame.KMOD_NONE:
                     typed = typed[:-1]
+                    running_text_manager.total_typed -= 1
 
                 # remove the last word
                 elif event.mod == pygame.KMOD_LALT or event.mod == pygame.KMOD_LCTRL:
@@ -58,23 +52,22 @@ while running:
                 elif event.mod == pygame.KMOD_LMETA:
                     typed = ''
             elif event.key == pygame.K_RETURN:
-                if running_text_manager.remove_text_match(typed):
-                    score += len(typed)
                 typed = ''
             else:
                 if event.unicode in allowed_chars: 
                     typed += event.unicode
+                    running_text_manager.total_typed += 1
             
-            formatted_text.update(typed)
+            running_text_manager.update_typing(typed)
                 
     
     screen.fill(pygame.color.Color(33, 51, 45))
 
     # UPDATES GAME HERE
-    formatted_text.update_timer()
+    running_text_manager.update()
 
     # RENDER GAME HERE
-    formatted_text.render(screen)
+    running_text_manager.render(screen)
 
     # update the screen
     pygame.display.flip()
