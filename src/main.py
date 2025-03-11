@@ -19,18 +19,17 @@ running = True
 font_path = os.path.join(BASE_DIR, 'assets', 'fonts', 'anonymouspro.ttf')
 font = pygame.font.Font(font_path, 32)
 
-
 typed = ""
 score = 0
-allowed_chars = allowed_chars = string.ascii_letters + string.digits + " "
+allowed_chars = allowed_chars = string.ascii_letters + string.digits + " " + ",.?\"!@#$%^&*()"
 
 texts = [
     "hello people how are you this is a test goodbye and thanks for playing you did it you are a pro",
     "no seriously who thought this would be a good idea",
-    "this is game is kinda trash, nobody would want to play a game you just type and type and type..."
+    "this game is kinda trash, nobody would want to play a game you just type and type and type..."
 ]
 text_info = TextInfo(font, 'white', 'red', 'green', 'yellow', 30, 10, 0)
-running_text_manager = RunningTextManager(texts, text_info, -3, 4)
+running_text_manager = RunningTextManager(texts, text_info, -2, 4)
 
 # game loop
 while running:
@@ -53,6 +52,10 @@ while running:
                     typed = ''
             elif event.key == pygame.K_RETURN:
                 typed = ''
+            elif event.key == pygame.K_LMETA:
+                running_text_manager.change_selected_text(+1)
+            elif event.key == pygame.K_RMETA:
+                running_text_manager.change_selected_text(-1)
             else:
                 if event.unicode in allowed_chars: 
                     typed += event.unicode

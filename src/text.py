@@ -1,3 +1,4 @@
+import pygame
 from globals import WIDTH, HEIGHT
 
 class TextInfo:
@@ -29,6 +30,7 @@ class FormattedText:
         self.lines = []
         cur_line = ''
         words = text.split(' ')
+        self.max_chars_inline = 0
 
         for i in range(len(words)):
             if len(cur_line) + len(words[i]) < text_info.line_max_letters:
@@ -39,6 +41,9 @@ class FormattedText:
             
             if i == len(words) -1:
                 self.lines.append(cur_line.rstrip())
+
+            if len(cur_line) > self.max_chars_inline:
+                    self.max_chars_inline = len(cur_line)
 
         # positions, spacing and movement
         self.char_width, self.char_height = text_info.font.size('A')
@@ -58,10 +63,13 @@ class FormattedText:
         self.cur_line = 0
         self.cur_char = 0
 
+        # selected rectangle
+        self.selected_border_size = 3
+        self.selected_padding = 20
+
         # BACKGROUND COLORS FOR EACH CHARACTER
         # self.rect_surface = pygame.Surface((self.char_width, self.char_height))
         # self.rect_surface.set_alpha(50)
-
     
     def update_typing(self, typed):
         '''Update all the information of the text, like the status of each character, the current line typed length and the underline position'''
@@ -97,7 +105,6 @@ class FormattedText:
             (self.y + self.char_height * self.cur_line + self.cur_line * self.line_distance + 2) - self.y_speed
         )
 
-
     def render(self, screen):
         '''Render each individual character with it's status color, into the screen'''
 
@@ -121,3 +128,16 @@ class FormattedText:
                 status_id += 1
 
         screen.blit(self.underline_render, self.underline_pos)
+
+    def render_rectangle_around_selected(self, screen):
+        '''Render a rectangle around the selected text'''
+        x = self.x - self.selected_padding
+        y = self.y - self.selected_padding + 5
+        width = (self.max_chars_inline * self.char_width) + self.selected_padding
+        height = ((len(self.lines) + 1) * self.char_height) + self.selected_padding + 10
+
+        white_rect = pygame.Rect(x, y, width, height)
+        inside_rect = pygame.Rect(x+self.selected_border_size, y+self.selected_border_size, width-self.selected_border_size*2, height-self.selected_border_size*2)
+
+        pygame.draw.rect(screen, 'white', white_rect)
+        pygame.draw.rect(screen, pygame.color.Color(33, 51, 45), inside_rect)

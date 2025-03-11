@@ -2,6 +2,7 @@ from text import FormattedText
 import random
 from text import FormattedText
 from globals import WIDTH
+
 class StaticTextManager:
     def __init__(self, texts, text_info, time_seconds):
         self.remaining_texts = []
@@ -25,11 +26,12 @@ class RunningTextManager:
         self.font = text_info.font
         self.remaining_texts = [] # texts that are yet to be displayed
         self.running_texts = [] # texts displayed on the screen
-        self.focused_texts = [] # texts the user is "probably" typing
+        #self.focused_texts = [] # texts the user is "probably" typing
         self.avg_speed = avg_speed
         self.spawn_delay = spawn_delay
         self.delay_timer = spawn_delay
         self.offscreen_valid_space = 30
+        self.selected_text_id = 0
         
         # stats
         self.wpm = 0
@@ -69,12 +71,16 @@ class RunningTextManager:
                 self.running_texts.remove(running_text)
                 
     def update_typing(self, typed):
-        for text in self.running_texts:
-            text.update_typing(typed)
+        self.running_texts[self.selected_text_id].update_typing(typed)
 
         self.wpm = round(self.total_typed / 5) * 60 // (self.seconds + 1)
     
     def render(self, screen):
+        # render on the selected text a rectangle around it
+        if len(self.running_texts):
+            self.running_texts[self.selected_text_id].render_rectangle_around_selected(screen)
+
+
         for text in self.running_texts:
             text.render(screen)
 
