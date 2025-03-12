@@ -1,6 +1,6 @@
 # HyperTyper
-A typing game written in python.
+A typing game written in python and pygame.
 
 Preview of the current state of the game:
 
-![hypertyper_update](https://github.com/user-attachments/assets/51460e48-79d2-45f1-8a49-a1b64e51f3f8)
+![hypertyper_update](https://github.com/user-attachments/assets/dd76cb6f-776a-4854-86e8-088d0df61983)
