@@ -16,6 +16,7 @@ class TextInfo:
 class FormattedText:
     '''Format text to be displayed with a left align and a max number of letters per line'''
     def __init__(self, text, text_info):
+        self.typed = ''
         self.text = text
         self.font = text_info.font
         self.colors = {
@@ -61,7 +62,8 @@ class FormattedText:
         self.underline_pos = (self.x, self.y + 2)
         self.amount_typed_inline = 0
         self.cur_line = 0
-        self.cur_char = 0
+        self.cur_char_n = 0
+        self.underline_bottom_distance = 2
 
         # selected rectangle
         self.selected_border_size = 3
@@ -71,19 +73,8 @@ class FormattedText:
         # self.rect_surface = pygame.Surface((self.char_width, self.char_height))
         # self.rect_surface.set_alpha(50)
     
-    def update_typing(self, typed):
-        '''Update all the information of the text, like the status of each character, the current line typed length and the underline position'''
-        for i in range(len(typed)):
-            if self.text[i] == typed[i]:
-                if self.char_status[i] == 'wrong' or self.char_status[i] == 'corrected':
-                    self.char_status[i] = 'corrected'
-                else:
-                    self.char_status[i] = 'correct'
-            else:
-                self.char_status[i] = 'wrong'
-
-        # getting the total typed in the current line
-        amount_typed_inline = len(typed)
+    def update_typed_inline(self):
+        amount_typed_inline = len(self.typed)
         for i in range(len(self.lines)):
             line = self.lines[i]
             if amount_typed_inline + 1 > len(line):
@@ -92,18 +83,49 @@ class FormattedText:
                 self.cur_line = i
                 break
         self.amount_typed_inline = amount_typed_inline
+    
+    def type_new_char(self, new_char):
+        '''Update all the information of the text, like the status of each character, the current line self.typed length and the underline position'''
+        self.typed += new_char
         
-        self.cur_char = len(typed)-1
+        for i in range(len(self.typed)):
+            if self.text[i] == self.typed[i]:
+                if self.char_status[i] == 'wrong' or self.char_status[i] == 'corrected':
+                    self.char_status[i] = 'corrected'
+                else:
+                    self.char_status[i] = 'correct'
+            else:
+                self.char_status[i] = 'wrong'
+    
+    def remove_last_char(self):
+        if self.typed:
+            char = self.typed[-1]
+            self.typed = self.typed[:-1]
+            return char
 
+    def remove_last_word(self):
+        if self.typed:
+            last_word = self.typed.rstrip().split(' ')[-1]
+            self.typed = ' '.join(self.typed.rstrip().split(' ')[:-1])
+            return last_word
+
+    def remove_whole_text(self):
+        if self.typed:
+            text = self.typed
+            self.typed = ''
+            return text
 
     def update(self):
         self.x += self.x_speed
         self.y += self.y_speed
         
         self.underline_pos = (
-            (self.x + self.char_width * self.amount_typed_inline + self.amount_typed_inline * self.letter_spacing) - self.x_speed,                   
-            (self.y + self.char_height * self.cur_line + self.cur_line * self.line_distance + 2) - self.y_speed
+            ((self.x + self.char_width * self.amount_typed_inline) + (self.amount_typed_inline * self.letter_spacing)) - self.x_speed,                   
+            ((self.y + self.char_height * self.cur_line) + (self.cur_line * self.line_distance) + self.underline_bottom_distance) - self.y_speed
         )
+
+        self.update_typed_inline()
+        self.cur_char_n = len(self.typed)-1
 
     def render(self, screen):
         '''Render each individual character with it's status color, into the screen'''
@@ -114,7 +136,7 @@ class FormattedText:
             line = self.lines[i]
             for j in range(len(line)):
                 char = line[j]
-                color = self.colors['default'] if status_id > self.cur_char else self.colors[self.char_status[status_id]]
+                color = self.colors['default'] if status_id > self.cur_char_n else self.colors[self.char_status[status_id]]
                 char_render = self.font.render(char, True, color)
                 char_y = self.y + self.char_height * i + i * self.line_distance
                 char_x = self.x + self.char_width * j + j * self.letter_spacing

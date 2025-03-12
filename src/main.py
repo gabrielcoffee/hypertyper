@@ -19,7 +19,6 @@ running = True
 font_path = os.path.join(BASE_DIR, 'assets', 'fonts', 'anonymouspro.ttf')
 font = pygame.font.Font(font_path, 32)
 
-typed = ""
 score = 0
 allowed_chars = allowed_chars = string.ascii_letters + string.digits + " " + ",.?\"!@#$%^&*()"
 
@@ -39,30 +38,29 @@ while running:
 
         if event.type == pygame.KEYDOWN:
 
-            if event.key == pygame.K_BACKSPACE:
-                if event.mod == pygame.KMOD_NONE:
-                    typed = typed[:-1]
-                    running_text_manager.total_typed -= 1
+            cur_text = running_text_manager.get_selected_text()
 
-                # remove the last word
-                elif event.mod == pygame.KMOD_LALT or event.mod == pygame.KMOD_LCTRL:
-                    typed = ' '.join(typed.rstrip().split(' ')[:-1])
-                # remove the entire typed text, only works for mac (LMETA is the command key on mac)
-                elif event.mod == pygame.KMOD_LMETA:
-                    typed = ''
-            elif event.key == pygame.K_RETURN:
-                typed = ''
-            elif event.key == pygame.K_LMETA:
+            if event.key == pygame.K_BACKSPACE:
+
+                if cur_text:
+
+                    if event.mod == pygame.KMOD_NONE:
+                        removed = cur_text.remove_last_char()
+
+                    elif event.mod == pygame.KMOD_LALT or event.mod == pygame.KMOD_LCTRL:
+                        removed = cur_text.remove_last_word()
+                    
+                    elif event.mod == pygame.KMOD_LMETA: # LMETA is the command key on mac
+                        removed = cur_text.remove_whole_text()
+                    
+                    running_text_manager.update_total_typed(removed)
+
+            elif event.key == pygame.K_LCTRL:
                 running_text_manager.change_selected_text(+1)
-            elif event.key == pygame.K_RMETA:
-                running_text_manager.change_selected_text(-1)
             else:
                 if event.unicode in allowed_chars: 
-                    typed += event.unicode
-                    running_text_manager.total_typed += 1
-            
-            running_text_manager.update_typing(typed)
-                
+                    cur_text.type_new_char(event.unicode)
+                    running_text_manager.update_total_typed(event.unicode)
     
     screen.fill(pygame.color.Color(33, 51, 45))
 
